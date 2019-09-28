@@ -2,7 +2,6 @@ from flask import Flask
 from flask_moment import Moment
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_login import LoginManager
 import logging
 from logging.handlers import SMTPHandler
@@ -11,12 +10,14 @@ from logging.handlers import SMTPHandler
 journal_app = Flask(__name__)
 journal_app.config.from_object(Config)
 db = SQLAlchemy(journal_app)
-migrate = Migrate(journal_app, db)
+
 login = LoginManager(journal_app)
 login.login_view = 'login'
 moment = Moment(journal_app)
 
 from app import routes, models, errors
+from app.models import User, Post
+
 
 # Logic that handles emailing errors
 
