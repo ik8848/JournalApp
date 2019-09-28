@@ -13,7 +13,7 @@ from datetime import datetime
 @login_required
 def index():
     current_hour = datetime.now().hour
-    
+
     return render_template('index.html', title='Journal/Poem App', current_hour=current_hour)
 
 @journal_app.route('/', methods=['GET', 'POST'])
@@ -23,11 +23,29 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
+
+
+
         user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+        email = User.query.filter_by(email=form.username.data).first()
+        #If the username and email do not exist
+        if user is None and email is None:
+            flash('Invalid username or email')
             return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
+        #If user exists but password is wrong
+        elif user is not None and not user.check_password(form.password.data):
+            flash('Wrong password')
+            return redirect(url_for('login'))
+        #If email id exists but password is wrong
+        elif email is not None and not email.check_password(form.password.data):
+            flash('Wrong password')
+            return redirect(url_for('login'))
+        #If username is entered and it is valid
+        if user is not None:
+            login_user(user, remember=form.remember_me.data)
+        #If email is entered and it is valid
+        elif email is not None:
+            login_user(email, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
